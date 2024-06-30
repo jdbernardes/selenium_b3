@@ -8,7 +8,8 @@ from botocore.exceptions import ClientError
 from datetime import datetime
 
 #%%
-date = datetime.now().strftime('%d-%m-%y')
+# date = datetime.now().strftime('%d-%m-%y')
+date = '26-06-24'
 csv_file_name = f'IBOVDia_{date}.csv'
 
 bucket_name = "fiap-julio-general"
@@ -22,12 +23,9 @@ output_path_parquet = f'data/IBOVDia_{date}.parquet'
 def csv_to_parquet(input_path_csv, output_path_parquet):
     colnames=['setor', 'codigo', 'acao', 'tipo', 'qtde_teorica', 'part_percent', 'part_percent_acum']
     df = pd.read_csv(input_path_csv,names=colnames, encoding='latin-1', sep = ';', skiprows=2, skipfooter=2, index_col=False, engine='python', dtype=str)
-    df['qtde_teorica'] = df['qtde_teorica'].str.replace(".","")
-    df['part_percent'] = df['part_percent'].str.replace(',','.')
-    df['part_percent_acum'] = df['part_percent_acum'].str.replace(',','.')
-    df['qtde_teorica'] = df['qtde_teorica'].astype(int)
-    df['part_percent'] = df['part_percent'].astype(float)
-    df['part_percent_acum'] = df['part_percent_acum'].astype(float)
+    df['qtde_teorica'] = df['qtde_teorica'].str.replace(".","").astype(int)
+    df['part_percent'] = df['part_percent'].str.replace(',','.').astype(float)
+    df['part_percent_acum'] = df['part_percent_acum'].str.replace(',','.').astype(float)
     table = pa.Table.from_pandas(df)
     pq.write_table(table, output_path_parquet)
 
