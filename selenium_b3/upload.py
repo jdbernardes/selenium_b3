@@ -6,7 +6,7 @@ import pyarrow.parquet as pq
 from botocore.exceptions import ClientError
 from datetime import datetime
 
-# date = datetime.now().strftime('%d-%m-%y')
+date = datetime.now().strftime('%d-%m-%y')
 date = '26-06-24'
 csv_file_name = f'IBOVDia_{date}.csv'
 
