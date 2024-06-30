@@ -1,4 +1,3 @@
-#%%
 import logging
 import boto3
 import pandas as pd
@@ -7,7 +6,6 @@ import pyarrow.parquet as pq
 from botocore.exceptions import ClientError
 from datetime import datetime
 
-#%%
 # date = datetime.now().strftime('%d-%m-%y')
 date = '26-06-24'
 csv_file_name = f'IBOVDia_{date}.csv'
@@ -18,7 +16,6 @@ bucket_layer = f"raw/ibovespa/{date}"
 input_path_csv = f'data/{csv_file_name}'
 output_path_parquet = f'data/IBOVDia_{date}.parquet'
 
-#%%
 #Convert local csv file to parquet
 def csv_to_parquet(input_path_csv, output_path_parquet):
     colnames=['setor', 'codigo', 'acao', 'tipo', 'qtde_teorica', 'part_percent', 'part_percent_acum']
@@ -33,7 +30,6 @@ csv_to_parquet(input_path_csv, output_path_parquet)
 
 parquet_file_name = f'IBOVDia_{date}.parquet'
 
-#%%
 #Upload the parquet file on S3 bucket
 def upload_file(parquet_file_name, bucket, object_name):
 
