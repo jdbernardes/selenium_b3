@@ -5,29 +5,46 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from botocore.exceptions import ClientError
 from datetime import datetime
+import os
 
-date = datetime.now().strftime('%d-%m-%y') 
-csv_file_name = f'IBOVDia_{date}.csv'
+# Retrieve a date from file (%d-%m-%y), trading_date(formated to %Y-%m-%d) and set important arguments for convertion to parquet and upload to s3
+def extract_date_file(local_path):
+    local_csv_files_list = [f for f in os.listdir(local_path) if f.endswith('.csv')]
+    for csv_file in local_csv_files_list:
+        csv_name = csv_file.split('/')[-1]
+        date_file = csv_name.split('_')[1].split('.')[0] 
+    return date_file
+
+date_file = extract_date_file('./data/')
+
+def transform_trading_date(date_file):
+    date_datetime = datetime.strptime(date_file, '%d-%m-%y')
+    trading_date = date_datetime.strftime('%Y-%m-%d')  
+    return trading_date
+
+trading_date = transform_trading_date(date_file)
+
+csv_file_name = f'IBOVDia_{date_file}.csv'
 
 bucket_name = "fiap-julio-general"
-bucket_layer = f"raw/ibovespa/{date}"
+bucket_layer = f"raw/ibovespa/{trading_date}"
 
 input_path_csv = f'data/{csv_file_name}'
-output_path_parquet = f'data/IBOVDia_{date}.parquet'
+output_path_parquet = f'data/IBOVDia_{trading_date}.parquet'
 
 #Convert local csv file to parquet
 def csv_to_parquet(input_path_csv, output_path_parquet):
-    colnames=['setor', 'codigo', 'acao', 'tipo', 'qtde_teorica', 'part_percent', 'part_percent_acum']
-    df = pd.read_csv(input_path_csv,names=colnames, encoding='latin-1', sep = ';', skiprows=2, skipfooter=2, index_col=False, engine='python', dtype=str)
-    df['qtde_teorica'] = df['qtde_teorica'].str.replace(".","").astype(int)
-    df['part_percent'] = df['part_percent'].str.replace(',','.').astype(float)
-    df['part_percent_acum'] = df['part_percent_acum'].str.replace(',','.').astype(float)
+    df = pd.read_csv(input_path_csv, encoding='ansi', sep = ';', skiprows=1, skipfooter=2, index_col=False, engine='python', dtype=str)
+    df['Qtde. Teórica'] = df['Qtde. Teórica'].str.replace(".","")
+    df['Part. (%)'] = df['Part. (%)'].str.replace(',','.')
+    df['Part. (%)Acum.'] = df['Part. (%)Acum.'].str.replace(',','.')
+    df['trading_date'] = trading_date
     table = pa.Table.from_pandas(df)
     pq.write_table(table, output_path_parquet)
 
 csv_to_parquet(input_path_csv, output_path_parquet)
 
-parquet_file_name = f'IBOVDia_{date}.parquet'
+parquet_file_name = f'IBOVDia_{trading_date}.parquet'
 
 #Upload the parquet file on S3 bucket
 def upload_file(parquet_file_name, bucket, object_name):
