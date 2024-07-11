@@ -11,9 +11,10 @@ class UploadAws:
         s3_client = boto3.client('s3')
         try:
             response = s3_client.upload_file(parquet_file_name, bucket, object_name)
-            if response: print("Upload concluido com sucesso")
         except ClientError as e:
             logging.error(e)
             return False
-        return True
+        else:
+            print("Upload concluido com sucesso")
+            return True
     
