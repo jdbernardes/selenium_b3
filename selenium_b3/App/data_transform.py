@@ -3,6 +3,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from datetime import datetime
 import os
+import shutil
 
 class DataTransform:
     
@@ -33,3 +34,9 @@ class DataTransform:
         df['trading_date'] = self.trading_date
         table = pa.Table.from_pandas(df)
         pq.write_table(table, output_path_parquet)
+    
+    def clear_data(self, local_path) -> None:
+        #delete path 
+        shutil.rmtree(local_path)
+        #create new empty path
+        os.makedirs(local_path)
