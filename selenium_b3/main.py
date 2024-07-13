@@ -24,3 +24,5 @@ data_transform.save_parquet(input_path_csv, output_path_parquet)
 
 aws = UploadAws()
 aws.upload_file(parquet_file_path, bucket_name, object_name)
+
+data_transform.clear_data(data_path)
